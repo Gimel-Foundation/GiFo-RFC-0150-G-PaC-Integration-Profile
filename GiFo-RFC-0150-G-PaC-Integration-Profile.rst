@@ -1,6 +1,5 @@
 ================================================================
-GiFo-RFC 0150: G-PaC Integration Profile - Combined Credential- and Platform-bound
-Enforcement (CCPE-B)
+GiFo-RFC 0150: G-PaC Integration Profile 
 ================================================================
 
 :Document: GiFo-Request for Comments: 0150
