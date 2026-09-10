@@ -3,11 +3,11 @@ GiFo-RFC 0150: G-PaC Integration Profile
 ================================================================
 
 :Document: GiFo-Request for Comments: 0150
-:Obsoletes: -
+:Obsoletes: v0.9.5 (20. April 2026)
 :Category: Standards Track
-:Version: 0.9.5 (Draft – Under Vendor Review)
+:Version: 0.9.6 (Draft – Under Vendor Review)
 :Authors: G. Wehberg, P. Baran and the Architecture Working Group of Gimel Foundation
-:Date: 20 April 2026
+:Date: 10 September 2026
 
 **G-PaC Integration Profile - Combined Credential- and Platform-bound
 Enforcement (CCPE-B)**
@@ -217,6 +217,7 @@ Appendices
 - Appendix B — OPA / Rego Cookbook (Informative)
 - Appendix C — Cedar Cookbook (Informative)
 - Appendix D — SpiceDB Cookbook (Informative)
+- E. Mistral Studio / Shieldstral Cross-Profile Cookbook (Informative)
 
 
 1. Scope
@@ -614,6 +615,8 @@ profile that matches the "majority" of its operational governance
 surface and document the partial divergence in its compliance
 attestation. CCPE-A and CCPE-B are deployment-shape labels, not
 exclusive product categories.
+
+Informative Mistral cross-profile example. Appendix E describes one proposed Mistral Studio / Shieldstral deployment shape governed as CCPE-A/S2 by GiFo-RFC 0140: GAuth Phase 1, a separate qualifying deterministic platform-governance Phase 2, and Shieldstral as a supplementary probabilistic veto. Its placement here does not classify Shieldstral or its threshold wrapper as a Policy-PDP, does not make either component CCPE-B, and does not expand this RFC’s normative CCPE-B engine set.
 
 
 4. Integration Architecture
@@ -2142,6 +2145,15 @@ last-accessed date for each in-scope engine.
 - SpiceDB — Authzed
 - *(additional engines added on engine-maintainer request)*
 
+**Informative cross-profile cookbook.** Appendix E provides a Mistral
+Studio / Shieldstral integration example from the evidence snapshot
+dated 2026-09-10. It cites Mistral's Shieldstral launch, Shieldstral 1.0
+model documentation, Studio page, Moderation & Guardrailing
+documentation, and the observed Hugging Face repository/API revision.
+Appendix E describes a proposed CCPE-A/S2 architecture governed by
+GiFo-RFC 0140; its placement in this RFC neither qualifies Shieldstral
+as a deterministic Policy-PDP nor expands CCPE-B.
+
 
 10. How to Suggest a Correction
 ===============================
@@ -2886,6 +2898,294 @@ in Appendix A.3 as of 2026-04-18. The caveat language and zedtoken
 consistency model evolve; if the cookbook is out of date, please open a
 §10 issue. We will update this appendix without revising the normative
 spec.
+
+
+Appendix E — Mistral Studio / Shieldstral Cross-Profile Cookbook *(Informative)*
+--------------------------------------------------------------------------------
+
+E.1 Purpose, status, and integration value
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This cookbook is informative cross-profile guidance. It does not amend the CCPE-B requirements in
+§§4–6, classify Shieldstral as a Policy-PDP, or assert that Mistral Studio natively implements
+GAuth, CCPE, the proposed workload credential, or the controls required by GiFo-RFC 0140. Mistral
+and Shieldstral are Mistral AI product names used descriptively; no endorsement or partnership is
+implied.
+
+Mistral Studio provides a platform for building and operating AI systems, and Shieldstral adds
+policy-adaptive safety classification for text and images. Those are positive, complementary
+capabilities. The authority question remains separate: **who gave this agent authority to perform
+this exact action, for this purpose and within these limits?** A deployment with only platform
+controls or a single functional control artifact, and no separable principal-signed mandate used by
+a load-bearing Phase 1, fits the RFC 0050 S1 gap analysis rather than a conformant CCPE claim. The
+proposed target below is one complete **CCPE-A/S2** architecture governed by GiFo-RFC 0140; it is
+not an alternative CCPE-B architecture created by its placement in RFC 0150.
+
+E.2 Complete proposed CCPE-A/S2 chain and separate credentials
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: text
+
+   Park the exact proposed action
+             |
+             v
+   PHASE 1 — GAuth mandate check
+     deny / error ------------------------------> stop + audit
+     permit / constrain
+             |
+             v
+   PHASE 2 — distinct qualifying deterministic evaluator
+     separate workload credential · capability controls · privilege ring
+     deterministic trust state · kill switch · all applicable RFC 0140 controls
+     deny / error ------------------------------> stop + audit
+     platform permit + restrictive obligations within the mandate
+             |
+             v
+   SUPPLEMENTARY — Shieldstral safety veto
+     veto / uncertain / stale / error ----------> stop or separately authorized review
+     no veto
+             |
+             v
+   Bind both credentials + deterministic receipts + safety evidence
+   to the exact action/content; re-check; backend validates; host MAY execute at most once
+
+The sole source of delegated authority is the identifiable principal’s signed GAuth mandate. The
+distinct platform workload identity/access credential or scoped capability has a separate issuer and
+lifecycle and binds the workload, tenant, audience, access scope, issue/expiry times, revocation
+state, and immutable identifier or digest. It establishes software identity and access; it is not a
+mandate and cannot originate or enlarge the principal’s delegation. The target backend independently
+validates that platform credential.
+
+Phase 2 is a separate, qualifying **deterministic** platform-governance evaluator meeting all
+applicable GiFo-RFC 0140 requirements. In the RFC 0140/RFC 0150 chain semantic, ``CONSTRAIN``
+remains exclusive to Phase 1; Phase 2 returns permit/deny and may contribute restrictive obligations
+that cannot relax the mandate. Shieldstral and a deterministic threshold wrapper around its
+probabilistic scores are supplementary veto/review evidence only. They are not Phase 2 and do not
+become CCPE-B by appearing in this appendix.
+
+E.3 Exact action binding and separately gated model actions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before evaluation, the enforcing host parks a structured action containing at least tenant,
+principal, agent/workload, verb, resource, recipient, purpose, data class, region, parameters, and
+the applicable content digest. It uses a documented canonicalization and integrity-protectively
+binds the mandate, workload credential, both deterministic decisions, safety evidence, policy/model
+revisions, and validity window to that same action. A change to content, recipient, attachment,
+amount, resource, purpose, region, or verb invalidates the prior evidence and restarts every
+applicable check.
+
+The host treats these as distinct gated actions:
+
+1. **Read** protected account data.
+2. **Generate** a draft from protected data. Local generation remains independently gated because it
+   can exceed purpose, data-class, or processing constraints.
+3. **Disclose to a remote draft-generation model.** Sending protected context to a hosted generation
+   model is a separate disclosure to a named recipient/deployment and region. GAuth Phase 1 and the
+   deterministic platform check must allow that exact disclosure before transmission.
+4. **Disclose to a remote classifier.** Sending a prompt, response, image, account narrative, or
+   transaction detail is another separate disclosure to a named recipient/deployment and region.
+   GAuth Phase 1 and the deterministic platform check must allow that exact disclosure before any
+   classifier call. The host must not call Shieldstral first to discover whether disclosure is safe.
+5. **Release or execute** the final draft or downstream operation.
+
+Authorization to read or generate does not imply authorization to disclose protected context to a
+remote generation model, disclose a draft to a classifier, or send it to a customer. Each remote
+transmission requires its own recipient-, deployment-, region-, purpose-, and data-class-bound
+decision. Minimization or pseudonymization must itself remain within the authorized transformation
+and purpose.
+
+E.4 Synthetic banking flow
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Fictional example.** Northstar Bank’s service agent handles checking account ``A-204`` for
+``customer-77``. The principal-signed mandate is support-only: it permits a support-purpose balance
+read, preparation of a balance reply, separately bounded disclosure of masked minimum-necessary
+context to an approved EU draft-generation model, separately bounded disclosure of the draft to an
+approved EU classifier, and release of the resulting support reply to that customer. No transfer,
+credential-collection, or investment-advice authority is asserted. A separately issued
+customer-controlled service credential binds workload ``support-agent-12`` to tenant ``bank-eu``,
+audience ``bank-tool-gateway``, scoped read/reply access, and a short lifetime.
+
+1. **Park and bind the read.** The host constructs the exact ``read A-204`` action. GAuth validates
+   issuer, holder, audience, scope, purpose, delegation narrowing, time, budget, and revocation.
+   Deterministic Phase 2 validates the separate workload credential and applies capability, ring,
+   trust-state, kill-switch, and other applicable RFC 0140 controls. The backend validates the
+   credential before returning the balance.
+2. **Gate remote draft generation separately.** The host first parks the exact disclosure of masked,
+   minimum-necessary balance context to the approved generation-model deployment, including
+   recipient, region, purpose, data class, and transformation. Both deterministic stages must allow
+   that disclosure before transmission. The host then separately parks
+   ``generate support draft for customer-77``; the generation remains within the support-only
+   purpose and preserves all mandate constraints. No draft is released to the customer.
+3. **Gate classifier disclosure separately.** The host parks the exact disclosure of the generated
+   draft to the approved classifier deployment, including data class, recipient, region, purpose,
+   and permitted masking. Only after both deterministic stages allow this distinct disclosure does
+   the host digest and send that exact minimum-necessary draft.
+4. **Apply the veto.** A pinned Shieldstral checkpoint and versioned wrapper evaluate a reviewed
+   natural-language question. The evidence binds both normalized ``yes`` and ``no`` scores, question
+   and semantic direction, threshold and uncertainty rule, evaluated-content digest, time, and short
+   expiry. “No veto” is not permission.
+5. **Gate final release.** The host parks the exact send action and re-runs all applicable freshness
+   and authorization checks. It binds the mandate, workload credential, deterministic receipts,
+   safety evidence, recipient, and final content digest. The backend independently validates the
+   credential and releases the exact approved reply at most once.
+
+A harmless draft with no valid mandate stops before any remote generation or classifier disclosure.
+In the authorized support-reply path, the model may nevertheless produce: “To confirm your balance,
+reply with your online-banking password.” Sending a support reply is within the action class, but
+that misleading request is unsafe and the safety wrapper vetoes or parks the draft for separately
+authorized review. A safety result never validates a mandate violation: content outside the
+support-only mandate must stop on authority grounds regardless of its classifier score. Review does
+not override absent authority; changed content must be re-evaluated.
+
+E.5 Decision rule in plain language
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Read the table left to right. Phase 1 says whether the action is inside the principal’s delegated
+authority and is the only stage that can return ``CONSTRAIN``. Deterministic Phase 2 returns
+permit/deny and may attach more-restrictive obligations, but it cannot grant authority. Shieldstral
+may stop or park an otherwise authorized action but cannot permit it. **More restrictive wins.**
+
++------------------------+------------------------+------------------------+------------------------+
+| GAuth mandate check    | Deterministic platform | Shieldstral wrapper    | Result                 |
+|                        | check                  |                        |                        |
++========================+========================+========================+========================+
+| Deny or error          | Not called             | Not called             | Stop; delegated        |
+|                        |                        |                        | authority is not       |
+|                        |                        |                        | established for        |
+|                        |                        |                        | execution.             |
++------------------------+------------------------+------------------------+------------------------+
+| Permit or constrain    | Deny or error          | Not called             | Stop; platform         |
+|                        |                        |                        | requirements were not  |
+|                        |                        |                        | satisfied.             |
++------------------------+------------------------+------------------------+------------------------+
+| Permit or constrain    | Permit, with any       | Veto, uncertain,       | Stop or enter a        |
+|                        | restrictive            | stale, malformed, or   | separately authorized  |
+|                        | obligations            | error                  | no-execution review.   |
++------------------------+------------------------+------------------------+------------------------+
+| Permit                 | Permit                 | No veto; every binding | Host may execute the   |
+|                        |                        | current                | exact action; it is    |
+|                        |                        |                        | not required to do so. |
++------------------------+------------------------+------------------------+------------------------+
+| Constrain              | Permit, with any       | No veto; every binding | Host may execute only  |
+|                        | restrictive            | current                | within every surviving |
+|                        | obligations            |                        | mandate limit and      |
+|                        |                        |                        | platform obligation.   |
++------------------------+------------------------+------------------------+------------------------+
+| Any prior result       | Any prior result       | Action or content      | Invalidate evidence    |
+|                        |                        | changed                | and repeat all         |
+|                        |                        |                        | applicable checks.     |
++------------------------+------------------------+------------------------+------------------------+
+
+E.6 Errors, revocation, replay, and audit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-  Missing, expired, revoked, wrong-holder, or out-of-scope mandate: stop before Phase 2.
+-  Missing, expired, revoked, or wrong-tenant/audience/scope workload credential: stop; the backend
+   rejects it independently.
+-  Unavailable, stale, malformed, or denying deterministic evaluator, or a tripped kill switch: stop
+   before Shieldstral and execution.
+-  Shieldstral timeout, unknown revision, malformed scores, uncertainty, or evidence mismatch: treat
+   as a supplementary veto/failure; do not execute the consequential action.
+-  Revocation, scope narrowing, policy/model/wrapper change, a long queue, review, retry, failover,
+   resumed conversation, or material action/content change: invalidate affected cached and pending
+   evidence and re-check. Do not claim instant revocation without measured end-to-end evidence.
+-  Replay or duplicate: reject expired or consumed evidence and use target-side idempotency. After
+   an ambiguous dispatch timeout, query the target and never retry blindly.
+
+**Strict deployment choice and non-circular safety gate.** For every protected read, protected
+generation, remote generation-model disclosure, classifier disclosure, and final release/action in
+this cookbook, configure the mandate with ``phase2_required = true`` and carry that value in the
+validated Phase 1 attestation as specified by §4.2.2.1; apply the §8 fail-closed disposition when
+Phase 2 is unavailable. This is this cookbook’s strict deployment choice and does not change §8’s
+global fallback semantics. Configure the required output-safety gate independently with no bypass:
+the read, protected generation, and each remote disclosure receive their applicable Phase 1 and
+Phase 2 checks; the classifier disclosure does **not** require a recursively prior remote
+Shieldstral call. Shieldstral evaluates the resulting draft after its disclosure has been
+authorized, and a current no-veto result is then required before the separately checked final
+release.
+
+Use one correlation ID while retaining necessary references or digests for: mandate issuer/ID and
+Phase 1 result/constraints/freshness; workload-credential issuer/ID/digest, workload, tenant,
+audience, scope, expiry, and backend validation; deterministic
+evaluator/policy/ring/trust/kill-switch result; classifier repository/revision, question
+digest/direction, both scores, wrapper rule/outcome, and evaluated-content digest; normalized
+action, final binding, decision, target receipt, revocation, and failure events. Keep raw prompts,
+images, account data, mandates, and secrets out of general telemetry; separately authorize and
+protect any necessary content retention.
+
+E.7 Accountability boundary
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The bound chain makes it possible to inspect who granted what authority, which workload acted, which
+controls decided, what exact object was approved, and what the backend executed. That supports
+incident reconstruction and evidence-based allocation of responsibility. It does **not**
+automatically determine negligence, breach, regulatory responsibility, legal liability, compliance,
+admissibility, or any legal outcome; those depend on applicable law, contracts, organizational
+roles, causation, evidence rules, and qualified advice.
+
+E.8 Adoption checklist
+~~~~~~~~~~~~~~~~~~~~~~
+
+-  ☐ Record this as an informative RFC 0150 cross-profile cookbook for one proposed CCPE-A/S2
+   architecture under RFC 0140—not as a CCPE-B expansion.
+-  ☐ Keep the principal-signed mandate and separately issued workload identity/access credential
+   distinct; only the mandate delegates authority.
+-  ☐ Implement and evidence a separate qualifying deterministic Phase 2 with all applicable RFC 0140
+   controls.
+-  ☐ Keep Shieldstral supplementary and veto-only; never translate a score or “no veto” into
+   authority or access permission.
+-  ☐ Intercept and separately authorize protected reads, local generation, remote draft-generation
+   disclosure, remote classifier disclosure, and final release/execution.
+-  ☐ Bind both credentials, all decisions, revisions, recipients, actions, content, and validity
+   windows; re-evaluate on change.
+-  ☐ Require backend credential validation, no bypass path, fail-closed handling, replay protection,
+   and at-most-once effects.
+-  ☐ Set ``phase2_required = true`` for every protected action in this cookbook, carry it in the
+   validated §4.2.2.1 attestation, and apply §8 fail-closed handling without representing that
+   choice as a change to the RFC-wide fallback rule.
+-  ☐ Require the independent output-safety veto before final release without making classifier
+   disclosure depend on a recursively prior classifier call.
+-  ☐ Approve revocation, freshness, uncertainty, privacy, audit-minimization, retention, and
+   incident-reconciliation procedures.
+-  ☐ Verify deployment evidence rather than inferring native APIs, product-wide topology, or
+   conformance from this cookbook.
+
+E.9 Pinned evidence snapshot and sources
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This evidence snapshot is fixed to the final Mistral integration outline dated **10 September
+2026**. Sources were accessed on that date:
+
+1. Mistral, “Introducing Shieldstral” (4 August 2026): 3B branding, Apache 2.0 open weights,
+   natural-language questions, text/image support, and normalized yes/no scoring.
+   https://mistral.ai/news/shieldstral/
+2. Mistral Docs, “Shieldstral 1.0”: Public Preview, v1.0, 3.8B documentation, and 32k documented
+   context.
+   https://docs.mistral.ai/models/shieldstral-1-0
+3. Mistral, “Studio”: platform positioning.
+   https://mistral.ai/products/studio/
+4. Mistral Docs, “Moderation & Guardrailing”: separately documented ``mistral-moderation-2603``
+   endpoint and recalibration warning.
+   https://docs.mistral.ai/studio-api/conversations/moderation
+5. Hugging Face API, ``mistralai/Shieldstral-1.0-3B``: repository revision observed
+   **``003ec7e2b0bab5f0e6307edbaf186fa5822b76f5``** and 3,849,090,048 BF16 parameters; no weights
+   were downloaded for the outline.
+   https://huggingface.co/api/models/mistralai/Shieldstral-1.0-3B
+
+“3B” is Mistral’s launch/repository branding; the model documentation says 3.8B and the observed
+repository API reports 3,849,090,048 parameters. These are recorded as descriptions of the observed
+repository, not evidence of different models. The reviewed sources do not establish that Shieldstral
+is embedded in every Studio moderation path or that the separately documented moderation endpoint is
+Shieldstral.
+
+Internal architectural references are GiFo-RFC 0050 (S1/S2 scenario taxonomy), GiFo-RFC 0130
+(platform-bound versus credential-bound evaluation frame), GiFo-RFC 0140 (the governing CCPE-A
+integration architecture), and this RFC (the CCPE-B boundary that this informative cross-profile
+placement must not expand). Public sources do not prove a customer’s Studio topology, deterministic
+RFC 0140 evaluator, workload credential, required platform controls, interception completeness,
+audit export, or native GAuth/CCPE integration.
+
 
 ----
 
