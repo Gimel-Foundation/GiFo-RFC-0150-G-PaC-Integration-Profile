@@ -217,7 +217,7 @@ Appendices
 - Appendix B — OPA / Rego Cookbook (Informative)
 - Appendix C — Cedar Cookbook (Informative)
 - Appendix D — SpiceDB Cookbook (Informative)
-- E. Mistral Studio / Shieldstral Cross-Profile Cookbook (Informative)
+- Appendix E — Mistral Studio / Shieldstral Cross-Profile Cookbook (Informative)
 
 
 1. Scope
@@ -2900,11 +2900,12 @@ consistency model evolve; if the cookbook is out of date, please open a
 spec.
 
 
-Appendix E — Mistral Studio / Shieldstral Cross-Profile Cookbook *(Informative)*
---------------------------------------------------------------------------------
+Appendix E — Mistral Studio / Shieldstral Cross-Profile Cookbook (Informative)
+============================================================================
+
 
 E.1 Purpose, status, and integration value
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------
 
 This cookbook is informative cross-profile guidance. It does not amend the CCPE-B requirements in
 §§4–6, classify Shieldstral as a Policy-PDP, or assert that Mistral Studio natively implements
@@ -2922,7 +2923,8 @@ proposed target below is one complete **CCPE-A/S2** architecture governed by GiF
 not an alternative CCPE-B architecture created by its placement in RFC 0150.
 
 E.2 Complete proposed CCPE-A/S2 chain and separate credentials
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------------------------------------
+
 
 .. code:: text
 
@@ -2964,7 +2966,8 @@ probabilistic scores are supplementary veto/review evidence only. They are not P
 become CCPE-B by appearing in this appendix.
 
 E.3 Exact action binding and separately gated model actions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------------------
+
 
 Before evaluation, the enforcing host parks a structured action containing at least tenant,
 principal, agent/workload, verb, resource, recipient, purpose, data class, region, parameters, and
@@ -2995,7 +2998,8 @@ decision. Minimization or pseudonymization must itself remain within the authori
 and purpose.
 
 E.4 Synthetic banking flow
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
+
 
 **Fictional example.** Northstar Bank’s service agent handles checking account ``A-204`` for
 ``customer-77``. The principal-signed mandate is support-only: it permits a support-purpose balance
@@ -3011,12 +3015,14 @@ audience ``bank-tool-gateway``, scoped read/reply access, and a short lifetime.
    Deterministic Phase 2 validates the separate workload credential and applies capability, ring,
    trust-state, kill-switch, and other applicable RFC 0140 controls. The backend validates the
    credential before returning the balance.
-2. **Gate remote draft generation separately.** The host first parks the exact disclosure of masked,
-   minimum-necessary balance context to the approved generation-model deployment, including
-   recipient, region, purpose, data class, and transformation. Both deterministic stages must allow
-   that disclosure before transmission. The host then separately parks
-   ``generate support draft for customer-77``; the generation remains within the support-only
-   purpose and preserves all mandate constraints. No draft is released to the customer.
+2. **Gate remote draft generation separately.** Before transmission, the
+   host evaluates both the proposed generation operation and the exact
+   disclosure of masked, minimum-necessary balance context to the
+   approved generation-model deployment, including recipient, region,
+   purpose, data class, and transformation. Both deterministic stages
+   must allow the applicable actions before the request is sent.
+   Generation remains within the support-only purpose and preserves
+   all mandate constraints. No draft is released to the customer.
 3. **Gate classifier disclosure separately.** The host parks the exact disclosure of the generated
    draft to the approved classifier deployment, including data class, recipient, region, purpose,
    and permitted masking. Only after both deterministic stages allow this distinct disclosure does
@@ -3039,7 +3045,8 @@ support-only mandate must stop on authority grounds regardless of its classifier
 not override absent authority; changed content must be re-evaluated.
 
 E.5 Decision rule in plain language
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------
+
 
 Read the table left to right. Phase 1 says whether the action is inside the principal’s delegated
 authority and is the only stage that can return ``CONSTRAIN``. Deterministic Phase 2 returns
@@ -3078,7 +3085,9 @@ may stop or park an otherwise authorized action but cannot permit it. **More res
 +------------------------+------------------------+------------------------+------------------------+
 
 E.6 Errors, revocation, replay, and audit
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------
+
+
 
 -  Missing, expired, revoked, wrong-holder, or out-of-scope mandate: stop before Phase 2.
 -  Missing, expired, revoked, or wrong-tenant/audience/scope workload credential: stop; the backend
@@ -3115,7 +3124,8 @@ images, account data, mandates, and secrets out of general telemetry; separately
 protect any necessary content retention.
 
 E.7 Accountability boundary
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
+
 
 The bound chain makes it possible to inspect who granted what authority, which workload acted, which
 controls decided, what exact object was approved, and what the backend executed. That supports
@@ -3125,7 +3135,8 @@ admissibility, or any legal outcome; those depend on applicable law, contracts, 
 roles, causation, evidence rules, and qualified advice.
 
 E.8 Adoption checklist
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
+
 
 -  ☐ Record this as an informative RFC 0150 cross-profile cookbook for one proposed CCPE-A/S2
    architecture under RFC 0140—not as a CCPE-B expansion.
@@ -3152,7 +3163,8 @@ E.8 Adoption checklist
    conformance from this cookbook.
 
 E.9 Pinned evidence snapshot and sources
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------
+
 
 This evidence snapshot is fixed to the final Mistral integration outline dated **10 September
 2026**. Sources were accessed on that date:
